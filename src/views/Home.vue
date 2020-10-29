@@ -47,7 +47,7 @@ export default {
   name: "Home",
   data: () => ({
     posts: [],
-    page: 1, 
+    page: 1,
     length: null, //total length for page
     count: null, //total number of post
   }),
@@ -57,25 +57,30 @@ export default {
     this.getPosts();
   },
   methods: {
-    getPosts(){
+    getPosts() {
       axios
-      .get(`${SERVER_API_URL}/list?page=${this.$store.state.page}`)
-      .then((res) => {
-        this.page = this.$store.state.page;
-        this.posts = res.data.results;
-        this.count = res.data.count;
-        this.length = Math.ceil(this.count / 5);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        .get(`${SERVER_API_URL}/post-list?page=${this.$store.state.page}`)
+        .then((res) => {
+          this.page = this.$store.state.page;
+          this.posts = res.data.results;
+          this.count = res.data.count;
+          this.length = Math.ceil(this.count / 5);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     removePost(id) {
       this.$store.state.page = this.page;
       axios
         .delete(`${SERVER_API_URL}/post-delete/${id}`)
         .then(() => {
-          this.$store.state.page = (this.count - 1) / 5;
+          console.log((this.count - 1) % 5 == 0);
+          if ((this.count - 1) % 5 == 0) {
+            if (this.$store.state.page !== 1) {
+              this.$store.state.page = this.$store.state.page - 1;
+            }
+          }
           this.getPosts();
         })
         .catch((error) => {
@@ -84,12 +89,12 @@ export default {
     },
     routePost() {
       this.$store.state.page = this.page;
-      console.log(this.$store.state.page)
+      console.log(this.$store.state.page);
       this.$router.push("/post");
     },
     pageInput() {
       axios
-        .get(`${SERVER_API_URL}/list?page=${this.page}`)
+        .get(`${SERVER_API_URL}/post-list?page=${this.page}`)
         .then((res) => {
           this.posts = res.data.results;
         })
